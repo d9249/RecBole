@@ -187,7 +187,7 @@ class AbstractSampler(object):
                         if v in used
                     ]
                 )
-        return torch.tensor(value_ids, dtype=torch.long)
+        return torch.tensor(value_ids)
 
 
 class Sampler(AbstractSampler):

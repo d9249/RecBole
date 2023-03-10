@@ -4,7 +4,6 @@ from recbole.utils.utils import (
     ensure_dir,
     get_model,
     get_trainer,
-    get_environment,
     early_stopping,
     calculate_valid_score,
     dict2str,
@@ -12,7 +11,6 @@ from recbole.utils.utils import (
     get_tensorboard,
     get_gpu_usage,
     get_flops,
-    list_to_latex,
 )
 from recbole.utils.enum_type import *
 from recbole.utils.argument_list import *
@@ -43,7 +41,5 @@ __all__ = [
     "set_color",
     "get_gpu_usage",
     "get_flops",
-    "get_environment",
-    "list_to_latex",
     "WandbLogger",
 ]

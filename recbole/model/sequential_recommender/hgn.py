@@ -77,6 +77,7 @@ class HGN(SequentialRecommender):
         self.apply(self._init_weights)
 
     def reg_loss(self, user_embedding, item_embedding, seq_item_embedding):
+
         reg_1, reg_2 = self.reg_weight
         loss_1_part_1 = reg_1 * torch.norm(self.w1.weight, p=2)
         loss_1_part_2 = reg_1 * torch.norm(self.w2.weight, p=2)
@@ -157,6 +158,7 @@ class HGN(SequentialRecommender):
         return output
 
     def forward(self, seq_item, user):
+
         seq_item_embedding = self.item_embedding(seq_item)
         user_embedding = self.user_embedding(user)
         feature_gating = self.feature_gating(seq_item_embedding, user_embedding)
@@ -168,6 +170,7 @@ class HGN(SequentialRecommender):
         return user_embedding + instance_gating + item_item
 
     def calculate_loss(self, interaction):
+
         seq_item = interaction[self.ITEM_SEQ]
         seq_item_embedding = self.item_embedding(seq_item)
         user = interaction[self.USER_ID]
@@ -193,6 +196,7 @@ class HGN(SequentialRecommender):
             )
 
     def predict(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         test_item = interaction[self.ITEM_ID]
         user = interaction[self.USER_ID]
@@ -202,6 +206,7 @@ class HGN(SequentialRecommender):
         return scores
 
     def full_sort_predict(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         user = interaction[self.USER_ID]
         seq_output = self.forward(item_seq, user)

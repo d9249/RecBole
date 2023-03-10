@@ -67,6 +67,7 @@ class NPE(SequentialRecommender):
             xavier_normal_(module.weight.data)
 
     def forward(self, seq_item, user):
+
         user_embedding = self.dropout(self.relu(self.user_embedding(user)))
         # batch_size * embedding_size
         seq_item_embedding = self.item_embedding(seq_item).sum(dim=1)
@@ -76,6 +77,7 @@ class NPE(SequentialRecommender):
         return user_embedding + seq_item_embedding
 
     def calculate_loss(self, interaction):
+
         seq_item = interaction[self.ITEM_SEQ]
         user = interaction[self.USER_ID]
         seq_output = self.forward(seq_item, user)
@@ -96,6 +98,7 @@ class NPE(SequentialRecommender):
             return loss
 
     def predict(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         test_item = interaction[self.ITEM_ID]
         user = interaction[self.USER_ID]
@@ -105,6 +108,7 @@ class NPE(SequentialRecommender):
         return scores
 
     def full_sort_predict(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         user = interaction[self.USER_ID]
         seq_output = self.forward(item_seq, user)

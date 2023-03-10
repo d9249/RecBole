@@ -14,11 +14,15 @@ from recbole.quick_start import run_recbole, run_recboles
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", "-m", type=str, default="BPR", help="name of models")
     parser.add_argument(
-        "--dataset", "-d", type=str, default="ml-100k", help="name of datasets"
+        "--model", "-m", type=str, default="LightGCN", help="name of models"
     )
-    parser.add_argument("--config_files", type=str, default=None, help="config files")
+    parser.add_argument(
+        "--dataset", "-d", type=str, default="Custom_ml-100k_2", help="name of datasets"
+    )
+    parser.add_argument(
+        "--config_files", "-cf", type=str, default=None, help="config files"
+    )
     parser.add_argument(
         "--nproc", type=int, default=1, help="the number of process in this group"
     )

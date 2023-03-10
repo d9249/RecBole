@@ -37,6 +37,7 @@ class RepeatNet(SequentialRecommender):
     input_type = InputType.POINTWISE
 
     def __init__(self, config, dataset):
+
         super(RepeatNet, self).__init__(config, dataset)
 
         # load the dataset information
@@ -80,6 +81,7 @@ class RepeatNet(SequentialRecommender):
         self.apply(self._init_weights)
 
     def _init_weights(self, module):
+
         if isinstance(module, nn.Embedding):
             xavier_normal_(module.weight.data)
         elif isinstance(module, nn.Linear):
@@ -88,6 +90,7 @@ class RepeatNet(SequentialRecommender):
                 constant_(module.bias.data, 0)
 
     def forward(self, item_seq, item_seq_len):
+
         batch_seq_item_embedding = self.item_matrix(item_seq)
         # batch_size * seq_len == embedding ==>> batch_size * seq_len * embedding_size
 
@@ -127,6 +130,7 @@ class RepeatNet(SequentialRecommender):
         return prediction
 
     def calculate_loss(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         item_seq_len = interaction[self.ITEM_SEQ_LEN]
         pos_item = interaction[self.POS_ITEM_ID]
@@ -138,6 +142,7 @@ class RepeatNet(SequentialRecommender):
         return loss
 
     def repeat_explore_loss(self, item_seq, pos_item):
+
         batch_size = item_seq.size(0)
         repeat, explore = torch.zeros(batch_size).to(self.device), torch.ones(
             batch_size
@@ -158,6 +163,7 @@ class RepeatNet(SequentialRecommender):
         return (-repeat_loss - explore_loss) / 2
 
     def full_sort_predict(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         item_seq_len = interaction[self.ITEM_SEQ_LEN]
         prediction = self.forward(item_seq, item_seq_len)
@@ -165,6 +171,7 @@ class RepeatNet(SequentialRecommender):
         return prediction
 
     def predict(self, interaction):
+
         item_seq = interaction[self.ITEM_SEQ]
         test_item = interaction[self.ITEM_ID]
         item_seq_len = interaction[self.ITEM_SEQ_LEN]

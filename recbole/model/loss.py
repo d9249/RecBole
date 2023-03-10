@@ -7,7 +7,6 @@
 # @Author : Shanlei Mu, Gaowei Zhang
 # @Email  : slmu@ruc.edu.cn, 1462034631@qq.com
 
-
 """
 recbole.model.loss
 #######################
@@ -16,8 +15,7 @@ Common Loss in recommender system
 
 import torch
 import torch.nn as nn
-
-
+    
 class BPRLoss(nn.Module):
     """BPRLoss, based on Bayesian Personalized Ranking
 

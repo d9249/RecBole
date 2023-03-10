@@ -93,6 +93,7 @@ class MRR(TopkMetric):
                 result[row, idx:] = 1 / (idx + 1)
             else:
                 result[row, idx:] = 0
+        # np.savetxt('/home/RecBole/result/result.csv', result, fmt='%d', delimiter=' ')
         return result
 
 
@@ -135,31 +136,6 @@ class MAP(TopkMetric):
             result[row] = sum_pre[row] / ranges
         return result
 
-
-class Recall(TopkMetric):
-    r"""Recall_ is a measure for computing the fraction of relevant items out of all relevant items.
-
-    .. _recall: https://en.wikipedia.org/wiki/Precision_and_recall#Recall
-
-    .. math::
-       \mathrm {Recall@K} = \frac{1}{|U|}\sum_{u \in U} \frac{|\hat{R}(u) \cap R(u)|}{|R(u)|}
-
-    :math:`|R(u)|` represents the item count of :math:`R(u)`.
-    """
-
-    def __init__(self, config):
-        super().__init__(config)
-
-    def calculate_metric(self, dataobject):
-        pos_index, pos_len = self.used_info(dataobject)
-        result = self.metric_info(pos_index, pos_len)
-        metric_dict = self.topk_result("recall", result)
-        return metric_dict
-
-    def metric_info(self, pos_index, pos_len):
-        return np.cumsum(pos_index, axis=1) / pos_len.reshape(-1, 1)
-
-
 class NDCG(TopkMetric):
     r"""NDCG_ (also known as normalized discounted cumulative gain) is a measure of ranking quality,
     where positions are discounted logarithmically. It accounts for the position of the hit by assigning
@@ -201,6 +177,28 @@ class NDCG(TopkMetric):
         result = dcg / idcg
         return result
 
+class Recall(TopkMetric):
+    r"""Recall_ is a measure for computing the fraction of relevant items out of all relevant items.
+
+    .. _recall: https://en.wikipedia.org/wiki/Precision_and_recall#Recall
+
+    .. math::
+       \mathrm {Recall@K} = \frac{1}{|U|}\sum_{u \in U} \frac{|\hat{R}(u) \cap R(u)|}{|R(u)|}
+
+    :math:`|R(u)|` represents the item count of :math:`R(u)`.
+    """
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, dataobject):
+        pos_index, pos_len = self.used_info(dataobject)
+        result = self.metric_info(pos_index, pos_len)
+        metric_dict = self.topk_result("recall", result)
+        return metric_dict
+
+    def metric_info(self, pos_index, pos_len):
+        return np.cumsum(pos_index, axis=1) / pos_len.reshape(-1, 1)
 
 class Precision(TopkMetric):
     r"""Precision_ (also called positive predictive value) is a measure for computing the fraction of relevant items
@@ -221,6 +219,7 @@ class Precision(TopkMetric):
         pos_index, _ = self.used_info(dataobject)
         result = self.metric_info(pos_index)
         metric_dict = self.topk_result("precision", result)
+        # np.savetxt('/home/RecBole/result/result.csv', pos_index, fmt='%d', delimiter=' ')
         return metric_dict
 
     def metric_info(self, pos_index):

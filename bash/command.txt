@@ -1,0 +1,32 @@
+root@38fe60b986b0:/home/RecBole# python run_recbole.py --model=LightGCN --embedding_size=128 --dataset ml-10m
+python run_recbole.py --model=LightGCN --dataset ml-10m
+
+e.g 
+python run_recbole.py --model=SGL --learning_rate=0.0001 --embedding_size=128
+
+e.g
+python /home/RecBole/run_hyper.py --model=BPR --dataset=ml-100k --config_files=test_hyper_tuning_config.yaml --params_file=test_hyper_tuning_params.yaml
+
+python run_recbole.py -m=LightGCN -d=ml-100k -cf=/home/RecBole/recbole/properties/overall.yaml
+
+python /home/RecBole/run_recbole.py -m=LightGCN -d=Custom_ml-100k_1
+
+python /home/RecBole/run_recbole.py -m=LightGCN -d=ml-100k
+
+python /home/RecBole/run_recbole.py -m=LightGCN -d=Custom_ml-100k_random
+
+python /home/RecBole/run_recbole.py -m=SRGNN -d=Custom_ml-100k_1 -cf=/home/RecBole/recbole/properties/overall.yaml
+
+python /home/RecBole/run_recbole.py -m=SRGNN -d=ml-100k
+
+python /home/RecBole/run_recbole.py -m=SRGNN -d=Custom_ml-100k_1
+
+python run_recbole.py -m=LightGCN -d=ml-1m -cf=/home/RecBole/recbole/properties/overall.yaml
+
+python run_recbole.py -m=SGL_Weight -d=Custom_ml-100k_1 -cf=/home/RecBole/recbole/properties/overall.yaml
+
+python run_recbole.py -m=LightGCN_Weight -d=Custom_ml-100k_1 -cf=/home/RecBole/recbole/properties/overall.yaml
+
+python run_recbole.py -m=LightGCN_Weight -d=Train_1_ml-1m -cf=/home/RecBole/recbole/properties/overall.yaml
+
+cd /home/RecBole && python train.py

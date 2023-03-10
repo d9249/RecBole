@@ -13,6 +13,7 @@ recbole.evaluator.abstract_metric
 """
 
 import torch
+import numpy as np
 from recbole.utils import EvaluatorType
 
 
@@ -57,11 +58,16 @@ class TopkMetric(AbstractMetric):
         self.topk = config["topk"]
 
     def used_info(self, dataobject):
-        """Get the bool matrix indicating whether the corresponding item is positive
+        """
+        Get the bool matrix indicating whether the corresponding item is positive
         and number of positive items for each user.
         """
         rec_mat = dataobject.get("rec.topk")
         topk_idx, pos_len_list = torch.split(rec_mat, [max(self.topk), 1], dim=1)
+        
+        # np.savetxt('/home/RecBole/result/topk_idx.csv', topk_idx.to(torch.bool).numpy(), fmt='%d', delimiter=' ')
+        # np.savetxt('/home/RecBole/result/pos_len_list.csv', pos_len_list.squeeze(-1).numpy(), fmt='%d', delimiter=' ')
+        
         return topk_idx.to(torch.bool).numpy(), pos_len_list.squeeze(-1).numpy()
 
     def topk_result(self, metric, value):

@@ -8,9 +8,9 @@
 # @Email  : chenyuwuxinn@gmail.com, zhlin@ruc.edu.cn, houyupeng@ruc.edu.cn, chenyushuo@ruc.edu.cn, slmu@ruc.edu.cn, panxy@ruc.edu.cn
 
 # UPDATE:
-# @Time   : 2020/10/8, 2020/10/15, 2020/11/20, 2021/2/20, 2021/3/3, 2021/3/5, 2021/7/18, 2022/7/11, 2023/2/11
-# @Author : Hui Wang, Xinyan Fan, Chen Yang, Yibo Li, Lanling Xu, Haoran Cheng, Zhichao Feng, Lei Wang, Gaowei Zhang
-# @Email  : hui.wang@ruc.edu.cn, xinyan.fan@ruc.edu.cn, 254170321@qq.com, 2018202152@ruc.edu.cn, xulanling_sherry@163.com, chenghaoran29@foxmail.com, fzcbupt@gmail.com, zxcptss@gmail.com, zgw2022101006@ruc.edu.cn
+# @Time   : 2020/10/8, 2020/10/15, 2020/11/20, 2021/2/20, 2021/3/3, 2021/3/5, 2021/7/18, 2022/7/11
+# @Author : Hui Wang, Xinyan Fan, Chen Yang, Yibo Li, Lanling Xu, Haoran Cheng, Zhichao Feng, Lei Wang
+# @Email  : hui.wang@ruc.edu.cn, xinyan.fan@ruc.edu.cn, 254170321@qq.com, 2018202152@ruc.edu.cn, xulanling_sherry@163.com, chenghaoran29@foxmail.com, fzcbupt@gmail.com, zxcptss@gmail.com
 
 r"""
 recbole.trainer.trainer
@@ -24,6 +24,7 @@ from time import time
 
 import numpy as np
 import torch
+import logging
 import torch.optim as optim
 from torch.nn.utils.clip_grad import clip_grad_norm_
 from tqdm import tqdm
@@ -45,6 +46,9 @@ from recbole.utils import (
     get_gpu_usage,
     WandbLogger,
 )
+from recbole.utils.case_study import full_sort_topk
+from recbole.data.dataset.dataset import Dataset
+# from recbole.data.dataset import id2token
 from torch.nn.parallel import DistributedDataParallel
 
 
@@ -462,7 +466,6 @@ class Trainer(AbstractTrainer):
                 valid_score, valid_result = self._valid_epoch(
                     valid_data, show_progress=show_progress
                 )
-
                 (
                     self.best_valid_score,
                     self.cur_step,
@@ -521,6 +524,7 @@ class Trainer(AbstractTrainer):
         try:
             # Note: interaction without item ids
             scores = self.model.full_sort_predict(interaction.to(self.device))
+            # np.savetxt('/home/RecBole/result/result_1.csv', positive_i, fmt='%d', delimiter=' ')
         except NotImplementedError:
             inter_len = len(interaction)
             new_inter = interaction.to(self.device).repeat_interleave(self.tot_item_num)
@@ -535,6 +539,7 @@ class Trainer(AbstractTrainer):
         scores[:, 0] = -np.inf
         if history_index is not None:
             scores[history_index] = -np.inf
+        # np.savetxt('/home/RecBole/result/result_2.csv', torch.cat(interaction+scores+positive_u+positive_i), fmt='%d', delimiter=' ')
         return interaction, scores, positive_u, positive_i
 
     def _neg_sample_batch_eval(self, batched_data):
@@ -546,6 +551,7 @@ class Trainer(AbstractTrainer):
             origin_scores = self._spilt_predict(interaction, batch_size)
 
         if self.config["eval_type"] == EvaluatorType.VALUE:
+            # np.savetxt('/home/RecBole/result/result2.csv', origin_scores+positive_u+positive_i, fmt='%d', delimiter=' ')
             return interaction, origin_scores, positive_u, positive_i
         elif self.config["eval_type"] == EvaluatorType.RANKING:
             col_idx = interaction[self.config["ITEM_ID_FIELD"]]
@@ -554,6 +560,7 @@ class Trainer(AbstractTrainer):
                 (batch_user_num, self.tot_item_num), -np.inf, device=self.device
             )
             scores[row_idx, col_idx] = origin_scores
+            # np.savetxt('/home/RecBole/result/result3.csv', scores[row_idx, col_idx], fmt='%d', delimiter=' ')
             return interaction, scores, positive_u, positive_i
 
     @torch.no_grad()
@@ -612,6 +619,7 @@ class Trainer(AbstractTrainer):
         for batch_idx, batched_data in enumerate(iter_data):
             num_sample += len(batched_data)
             interaction, scores, positive_u, positive_i = eval_func(batched_data)
+            
             if self.gpu_available and show_progress:
                 iter_data.set_postfix_str(
                     set_color("GPU RAM: " + get_gpu_usage(self.device), "yellow")
@@ -619,11 +627,22 @@ class Trainer(AbstractTrainer):
             self.eval_collector.eval_batch_collect(
                 scores, interaction, positive_u, positive_i
             )
+        
+        # print("interaction : ", interaction)
+        # print("scores : ", scores)
+        # print("scores size : ", scores.size())
+        # print("positive_u : ", positive_u)
+        # print("positive_i: ", positive_i)
+        
         self.eval_collector.model_collect(self.model)
         struct = self.eval_collector.get_data_struct()
         result = self.evaluator.evaluate(struct)
+        # np.savetxt('/home/RecBole/result/result.csv', dict2str(result), fmt='%d', delimiter=' ')
+        
         if not self.config["single_spec"]:
             result = self._map_reduce(result, num_sample)
+        
+        print('result : ', result)
         self.wandblogger.log_eval_metrics(result, head="eval")
         return result
 
@@ -667,6 +686,8 @@ class Trainer(AbstractTrainer):
             if len(result.shape) == 0:
                 result = result.unsqueeze(0)
             result_list.append(result)
+        # np.savetxt('/home/RecBole/result/result.csv', dict2str(result_list), fmt='%d', delimiter=' ')
+        # print(result_list)
         return torch.cat(result_list, dim=0)
 
 
@@ -1335,6 +1356,7 @@ class NCLTrainer(Trainer):
         self.eval_collector.data_collect(train_data)
 
         for epoch_idx in range(self.start_epoch, self.epochs):
+
             # only differences from the original trainer
             if epoch_idx % self.num_m_step == 0:
                 self.logger.info("Running E-step ! ")
@@ -1371,7 +1393,6 @@ class NCLTrainer(Trainer):
                 valid_score, valid_result = self._valid_epoch(
                     valid_data, show_progress=show_progress
                 )
-
                 (
                     self.best_valid_score,
                     self.cur_step,

@@ -38,4 +38,10 @@ class Evaluator(object):
         for metric in self.metrics:
             metric_val = self.metric_class[metric].calculate_metric(dataobject)
             result_dict.update(metric_val)
+            
+        precision = result_dict['precision@20']
+        recall = result_dict['recall@20']
+        f1 = 2*precision*recall/(precision+recall)
+        f1_dict = {'F1': f1}
+        result_dict.update(f1_dict)
         return result_dict

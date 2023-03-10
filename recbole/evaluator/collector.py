@@ -15,6 +15,7 @@ recbole.evaluator.collector
 from recbole.evaluator.register import Register
 import torch
 import copy
+import numpy as np
 
 
 class DataStruct(object):
@@ -117,6 +118,7 @@ class Collector(object):
         )
 
         obs = torch.cat([true_tensor, scores[:, 1:] != scores[:, :-1]], dim=1)
+        
         # bias added to dense
         bias = (
             torch.arange(0, length, device=self.device)
@@ -149,6 +151,7 @@ class Collector(object):
             positive_i(Torch.Tensor): the positive item id for each user.
         """
         if self.register.need("rec.items"):
+
             # get topk
             _, topk_idx = torch.topk(
                 scores_tensor, max(self.topk), dim=-1
@@ -156,6 +159,7 @@ class Collector(object):
             self.data_struct.update_tensor("rec.items", topk_idx)
 
         if self.register.need("rec.topk"):
+
             _, topk_idx = torch.topk(
                 scores_tensor, max(self.topk), dim=-1
             )  # n_users x k
@@ -167,6 +171,7 @@ class Collector(object):
             self.data_struct.update_tensor("rec.topk", result)
 
         if self.register.need("rec.meanrank"):
+
             desc_scores, desc_index = torch.sort(scores_tensor, dim=-1, descending=True)
 
             # get the index of positive items in the ranking list
@@ -185,6 +190,7 @@ class Collector(object):
             self.data_struct.update_tensor("rec.meanrank", result)
 
         if self.register.need("rec.score"):
+
             self.data_struct.update_tensor("rec.score", scores_tensor)
 
         if self.register.need("data.label"):
@@ -223,4 +229,5 @@ class Collector(object):
         for key in ["rec.topk", "rec.meanrank", "rec.score", "rec.items", "data.label"]:
             if key in self.data_struct:
                 del self.data_struct[key]
+        # np.savetxt('/home/RecBole/result/result.csv', returned_struct, fmt='%d', delimiter=' ')
         return returned_struct

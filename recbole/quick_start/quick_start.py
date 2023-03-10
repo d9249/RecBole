@@ -3,7 +3,7 @@
 # @Email  : slmu@ruc.edu.cn, zxcptss@gmail.com
 
 # UPDATE:
-# @Time   : 2022/7/8, 2022/07/10, 2022/07/13, 2023/2/11
+# @Time   : 2022/7/8, 2022/07/10, 2022/07/13
 # @Author : Zhen Tian, Junjie Zhang, Gaowei Zhang
 # @Email  : chenyuwuxinn@gmail.com, zjj001128@163.com, zgw15630559577@163.com
 
@@ -15,7 +15,6 @@ import logging
 from logging import getLogger
 
 import sys
-
 
 import pickle
 from ray import tune
@@ -35,7 +34,6 @@ from recbole.utils import (
     init_seed,
     set_color,
     get_flops,
-    get_environment,
 )
 
 
@@ -93,12 +91,6 @@ def run_recbole(
     # model evaluation
     test_result = trainer.evaluate(
         test_data, load_best_model=saved, show_progress=config["show_progress"]
-    )
-
-    environment_tb = get_environment(config)
-    logger.info(
-        "The running environment of this training is as follows:\n"
-        + environment_tb.draw()
     )
 
     logger.info(set_color("best valid ", "yellow") + f": {best_valid_result}")
@@ -199,3 +191,4 @@ def load_data_and_model(model_file):
     model.load_other_parameter(checkpoint.get("other_parameter"))
 
     return config, model, dataset, train_data, valid_data, test_data
+    # return model

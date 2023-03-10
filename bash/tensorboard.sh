@@ -1,0 +1,1 @@
+tensorboard --logdir=/home/RecBole/log_tensorboard --port 8501 --host=0.0.0.0
